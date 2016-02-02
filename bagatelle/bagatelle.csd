@@ -325,7 +325,7 @@ endin
 
 #define Risset #i5#
 #define TRN #0.05#
-
+#define C3 #130.81#
 
 ;; FUNCTIONS
 
@@ -372,6 +372,7 @@ i2  3    6     1000     440   .     0.7 0.3
 i2  4    6     2500     440   .     0.5 0.9
 i2  6    6     3000     660   .     0.5 0.7
 i2  10   6     1000     660   300   0.5 0.3
+i2  14   28    400      330   [$C3] 0.5 0.5
 
 ; Flute
 ; Init  Dur  Amplitude Pitch  Pressure  Breath
@@ -389,7 +390,7 @@ i1  +      1    .       9.00    0.80        .
 ; Using the { opcode to create two loops.
 ; The outer loops controls amplitude.
 ; Init         Dur   Amp  Pitch
-{ 2 OL
+{ 4 OL
 { 2 IL
 ; Primo
 i3  [8+$OL*8+$IL*2]  0.5   [1000/($OL+1)] 8.00
@@ -467,7 +468,7 @@ s
 
 
 ; Risset Arpeggio
-; Init Dur Amp  Pitch    Delta Rise Decay
+; Init Dur Amp  Pitch        Delta Rise Decay
 i5 0   16  5000 [7.00+$TRN.] 0.03  1   4
 
 ; Granular Effect
