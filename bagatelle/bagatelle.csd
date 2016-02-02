@@ -323,9 +323,17 @@ endin
 	
 <CsScore>
 
-#define Risset #i5#
+;; Note pitch macros
 #define TRN #0.05#
 #define C3 #130.81#
+
+;; Amplitudes
+#define RissetAmp #3000#
+#define FluteAmp   #6000#
+#define ViolinAmp  #4000#
+
+;; File names
+#define BeatsFile #"beats.wav"#
 
 ;; FUNCTIONS
 
@@ -340,7 +348,7 @@ f11 0 512   20 2
 ; Beats.
 ; Uses GEN1, which reads the waveshape from a file.
 ; Table size is specially large due to the size of the file.
-f12 0 131072 1 "beats.wav" 0 0 0
+f12 0 131072 1 $BeatsFile 0 0 0
 
 ; Enriched sine wave
 ; Using GEN10 to create a wave made up of three waves.
@@ -355,46 +363,35 @@ f14 0 4096 10 1  0  0  0  .7 .7 .7 .7 .7 .7
 f15 0 512 20 2
 
 
-s
-; FM Pad
-; Init        Dur Amp Pitch MAmp MFreq Pan Wave
-i6  0        0.5  5000 7.00  20         600      0.1   13
-i6  0.25   .  .          7.07  .         .                    >    .
-i6  0.5    .   .          8.00  .         .                     >   .
-i6  0.75 .   .          8.02  .         .                     >   .
-i6  1       .  .          8.04  .         .                      >    .
-i6  1.25 .  .          8.07  .         .                      >    .
-i6  1.5    .  .          8.04  .         .                     >   .
-i6  1.75  .  .          8.02  .         .                    0.9    .
 
 ;; SECTION 1
 ; Lasting 42 seconds
 s
 
 ; Risset
-; Init Dur Amp  Pitch Delta Rise Decay
-i5 0   42   5000 7.00  0.03  1   16
+; Init Dur Amp                Pitch Delta Rise Decay
+i5 0   42   $RissetAmp 7.00  0.03  1   16
 
 ; Granular Effect
 ;  Init  Dur  Amplitude Pitch Dens Pan
-i2  2    6     2500     220   200   0.5 0.1
-i2  3    6     1000     440   .     0.7 0.3
-i2  4    6     2500     440   .     0.5 0.9
-i2  6    6     3000     660   .     0.5 0.7
-i2  10   6     1000     660   300   0.5 0.3
-i2  14   28    400      330   [$C3] 0.5 0.5
+i2  2    6     2000     220   200   0.5 0.1
+i2  3    6     1500     440   .     0.7 0.3
+i2  4    6     2000     440   .     0.5 0.9
+i2  6    6     2500     660   .     0.5 0.7
+i2  10   6     500     660   300   0.5 0.3
+i2  14   28    200      330   [$C3] 0.5 0.5
 
 ; Flute
-; Init  Dur  Amplitude Pitch  Pressure  Breath
-i1  16     2   7000     9.00    0.80      0.018     
-i1  +      0.3    .     8.10    >         .    
-i1  +      0.3    .     9.02    >       .       
-i1  +      0.3    .     8.10    >         .       
-i1  +      1    .       8.07    >        .       
-i1  +      1    .       8.04    0.90       .  
-i1  +      1    .       8.07    >        .     
-i1  +      1    .       9.04    >        .    
-i1  +      1    .       9.00    0.80        .   
+; Init  Dur  Amplitude      Pitch  Pressure  Breath
+i1  16     2   $FluteAmp     9.00    0.80      0.018     
+i1  +      0.3    .                     8.10    >         .    
+i1  +      0.3    .                    9.02    >       .       
+i1  +      0.3    .                    8.10    >         .       
+i1  +      1    .                       8.07    >        .       
+i1  +      1    .                       8.04    0.90       .  
+i1  +      1    .                       8.07    >        .     
+i1  +      1    .                       9.04    >        .    
+i1  +      1    .                      9.00    0.80        .   
 
 ; Violins
 ; Using the { opcode to create two loops.
@@ -403,27 +400,27 @@ i1  +      1    .       9.00    0.80        .
 { 4 OL
 { 2 IL
 ; Primo
-i3  [8+$OL*8+$IL*2]  0.5   [1000/($OL+1)] 8.00
+i3  [8+$OL*8+$IL*2]  0.5   [($ViolinAmp/4)/($OL+1)] 8.00
 i3  +                 .      >            8.02
 i3  +                 .      >            8.04
-i3  +                 .    [8000/($OL+1)] 8.07
+i3  +                 .                      [$ViolinAmp/($OL+1)] 8.07
 ; Secondo
-i3  [8+$OL*8+$IL*2]  0.5   [1000/($OL+1)] 8.04
+i3  [8+$OL*8+$IL*2]  0.5   [($ViolinAmp/4)/($OL+1)] 8.04
 i3  +                 .      >            8.07
 i3  +                 .      >            9.00
-i3  +                 .    [8000/($OL+1)] 8.07
+i3  +                 .    [$ViolinAmp/($OL+1)] 8.07
 }
 { 2 IL
 ; Primo
-i3  [12+$OL*8+$IL*2]  0.5  [1000/($OL+1)] 8.04
+i3  [12+$OL*8+$IL*2]  0.5  [($ViolinAmp/4)/($OL+1)] 8.04
 i3  +                  .      >           8.07
 i3  +                  .      >           8.09
-i3  +                  .   [8000/($OL+1)] 9.00
+i3  +                  .   [$ViolinAmp/($OL+1)] 9.00
 ; Secondo
-i3  [12+$OL*8+$IL*2]  0.5  [1000/($OL+1)] 8.04
+i3  [12+$OL*8+$IL*2]  0.5  [($ViolinAmp/4)/($OL+1)] 8.04
 i3  +                  .      >           8.07
 i3  +                  .      >           9.00
-i3  +                  .   [8000/($OL+1)] 8.07
+i3  +                  .   [$ViolinAmp/($OL+1)] 8.07
 }
 }
 
@@ -440,14 +437,14 @@ i4  30   4    5000  8.07  0.5  .
 ; FM Pad
 ; Init                         Dur Amp Pitch MAmp MFreq Pan Wave
 { 8 IL
-i6  [24+$IL*2]        0.5  5000 7.00  20         600      0.1   13
+i6  [24+$IL*2]        0.5  3000 7.00  20         600      0.1   13
 i6  [24.25+$IL*2]   .       >        7.07  .         .                    >    .
 i6  [24.5+$IL*2]      .      >         8.00  .         .                     >   .
 i6  [24.75+$IL*2]   .      >         8.02  .         .                     >   .
 i6  [25+$IL*2]         .      >         8.04  .         .                      >    . 
 i6  [25.25+$IL*2]   .      >         8.07  .         .                      >    .
 i6  [25.5+$IL*2]     .      >          8.04  .         .                     >   .
-i6  [25.75+$IL*2]   .    1000    8.02  .         .                 0.9    .
+i6  [25.75+$IL*2]   .    500    8.02  .         .                 0.9    .
 }
 
 ; Hihat
@@ -465,11 +462,11 @@ i9 32   .   1000  4500  10000
 
 ; Clarinet
 ; Init  Dur  Amp   Pitch Feed Delay
-i4  34   -4   10000 9.04  0.5  0.005
+i4  34   -4   8000 9.04  0.5  0.005
 i4  37.5 -2   >     8.07  0.4  .
 i4  38   -4   >     9.04  0.4  .
 i4  39.5 -2   >     9.02  0.4  .
-i4  40   2    5000  9.00  0.5  .
+i4  40   1    5000  9.00  0.5  .
 
 ; Hihat
 ; Init Dur Amp   Freq  Rand
@@ -482,7 +479,7 @@ i9 40   3   10000 10500 200
 i9 40.5  .  )     4500  >
 i9 41   .   )     4500  >
 i9 41.5 .   )     4500  >
-i9 42   1   1000  4500  10000
+i9 42   0.5   1000  4500  10000
 
 
 
@@ -494,7 +491,7 @@ s
 
 ; Risset Arpeggio
 ; Init Dur Amp  Pitch        Delta Rise Decay
-i5 0   16  5000 [7.00+$TRN.] 0.03  1   4
+i5 0   16  [$RissetAmp*1.1] [7.00+$TRN.] 0.03  1   4
 
 ; Granular Effect
 ;  Init  Dur  Amplitude Pitch Dens Pan
@@ -506,7 +503,7 @@ i2  10   6     1000     660   300   0.5 0.5
 
 ; Flute
 ; Init  Dur  Amplitude Pitch  Pressure  Breath
-i1  8     2   7000     [9.00+$TRN.]    0.90      0.018     
+i1  8     2   [$FluteAmp*1.1]     [9.00+$TRN.]    0.90      0.018     
 i1  +   0.3    .       [8.10+$TRN.]    >         .    
 i1  +   0.3    .       [9.02+$TRN.]    >       .       
 i1  +   0.3    .       [8.10+$TRN.]    >         .       
@@ -514,7 +511,7 @@ i1 11     1    .       [8.07+$TRN.]    >        .
 i1  +     1    .       [8.04+$TRN.]    0.95       .  
 i1  +     1    .       [8.07+$TRN.]    >        .     
 i1  +     1    .       [9.04+$TRN.]    >        .    
-i1  +     2    .       [9.00+$TRN.]    0.80        .  
+i1  +     1    .       [9.00+$TRN.]    0.80        .  
 e
 
 </CsScore>
