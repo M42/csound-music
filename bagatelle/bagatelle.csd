@@ -9,7 +9,7 @@ ksmps = 8
 nchnls = 2
 0dbfs = 32767
 #define VOL#30000#
-
+#define ViolinFile #"violin.voc"#
 
 
 ;; SLIDE FLUTE
@@ -99,13 +99,13 @@ instr 2
 	kpitch    = p5
 	kdens     = p6
 	iinitpan  = p7
-    ifinalpan = p8
-	kampoff   = 0
-	kpitchoff = 100
+            ifinalpan = p8
+	kampoff   = 500
+	kpitchoff = 200
 	kgdur     = 0.6
 	igfn      = 12
 	iwfn      = 11
-	imgdur    = 2 
+	imgdur    = 1 
  
 	;kcps = 1/idur	 
 	;kenv1 oscil kamp/2, 1, 15  
@@ -155,7 +155,7 @@ instr 3
 	; The supplied pointer reads the file linearly, with a
 	; speed depending on the duration of the note in the score.
 	klect line 0, p3, 0.75
-	aviolin pvoc klect, kfrqm, "violin.voc"	
+	aviolin pvoc klect, kfrqm, $ViolinFile.	
 	
 	; Reverb effect
 	ireverb = 0.2
@@ -176,7 +176,6 @@ endin
 ; * Flanger effect
 ; * 
 instr 4
-	
 	idur  = abs(p3)
 	iamp  = p4
 	ifreq = cpspch(p5)
@@ -328,9 +327,12 @@ endin
 #define C3 #130.81#
 
 ;; Amplitudes
+; The amplitudes have been chosen emprirically.
+; They can be easily changed with the use of macros.
 #define RissetAmp #3000#
 #define FluteAmp   #6000#
 #define ViolinAmp  #4000#
+#define GranularAmp #800#
 
 ;; File names
 #define BeatsFile #"beats.wav"#
@@ -373,13 +375,13 @@ s
 i5 0   42   $RissetAmp 7.00  0.03  1   16
 
 ; Granular Effect
-;  Init  Dur  Amplitude Pitch Dens Pan
-i2  2    6     2000     220   200   0.5 0.1
-i2  3    6     1500     440   .     0.7 0.3
-i2  4    6     2000     440   .     0.5 0.9
-i2  6    6     2500     660   .     0.5 0.7
-i2  10   6     500     660   300   0.5 0.3
-i2  14   28    200      330   [$C3] 0.5 0.5
+;  Init  Dur  Amplitude                      Freq Dens Pan
+i2  2    6     [$GranularAmp.*2]     220    100   0.5 0.1
+i2  3    6     [$GranularAmp.*1.5]  440   .     0.7 0.3
+i2  4    6     [$GranularAmp.*2]     440   .     0.5 0.9
+i2  6    6     [$GranularAmp.*2]     660   .     0.5 0.7
+i2  10   6    [$GranularAmp./2]     660   300   0.5 0.3
+i2  14   26  [$GranularAmp./5]     [$C3]   300 0.5 0.5
 
 ; Flute
 ; Init  Dur  Amplitude      Pitch  Pressure  Breath
@@ -396,14 +398,14 @@ i1  +      1    .                      9.00    0.80        .
 ; Violins
 ; Using the { opcode to create two loops.
 ; The outer loops controls amplitude.
-; Init         Dur   Amp  Pitch
-{ 4 OL
+{ 3 OL
 { 2 IL
+; Init                              Dur   Amp                                          Pitch
 ; Primo
 i3  [8+$OL*8+$IL*2]  0.5   [($ViolinAmp/4)/($OL+1)] 8.00
-i3  +                 .      >            8.02
-i3  +                 .      >            8.04
-i3  +                 .                      [$ViolinAmp/($OL+1)] 8.07
+i3  +                                   .      >                                               8.02
+i3  +                                    .      >                                              8.04
+i3  +                                    .    [$ViolinAmp/($OL+1)]       8.07
 ; Secondo
 i3  [8+$OL*8+$IL*2]  0.5   [($ViolinAmp/4)/($OL+1)] 8.04
 i3  +                 .      >            8.07
@@ -427,6 +429,9 @@ i3  +                  .   [$ViolinAmp/($OL+1)] 8.07
 
 
 ; Clarinet
+; A negative duration allows the instrument to keep sounding
+; until it is terminated by another call to the same instrument.
+; The opcode ihold could be used instead. 
 ; Init  Dur  Amp   Pitch Feed Delay
 i4  24   -4   10000 9.00  0.5  0.005
 i4  27.5 -2   >     8.07  0.4  .
@@ -448,6 +453,8 @@ i6  [25.75+$IL*2]   .    500    8.02  .         .                 0.9    .
 }
 
 ; Hihat
+; Duration of the notes is a bit longer to let the sound
+; fade by itself.
 ; Init Dur Amp   Freq  Rand
 i9 24   3   1000  10500 200
 i9 24.5  .   )    4500  >
@@ -466,7 +473,7 @@ i4  34   -4   8000 9.04  0.5  0.005
 i4  37.5 -2   >     8.07  0.4  .
 i4  38   -4   >     9.04  0.4  .
 i4  39.5 -2   >     9.02  0.4  .
-i4  40   1    5000  9.00  0.5  .
+i4  40   2   5000  9.00  0  0
 
 ; Hihat
 ; Init Dur Amp   Freq  Rand
@@ -476,30 +483,34 @@ i9 35   .   )     4500  >
 i9 35.5 .   )     4500  >
 i9 36   .   10000 4500  10000
 i9 40   3   10000 10500 200
-i9 40.5  .  )     4500  >
-i9 41   .   )     4500  >
-i9 41.5 .   )     4500  >
+i9 40.5  2  )     4500  >
+i9 41   1.5   )     4500  >
+i9 41.5 1.0   )     4500  >
 i9 42   0.5   1000  4500  10000
 
 
 
 
 ;; SECTION 2
-; Lasting 18 seconds
+; Lasting 18 seconds aprox
+; This section is a trasposition of part of the previous one,
+; the trasposition interval can be changed with the TRN macro.
 s
 
 
 ; Risset Arpeggio
-; Init Dur Amp  Pitch        Delta Rise Decay
-i5 0   16  [$RissetAmp*1.1] [7.00+$TRN.] 0.03  1   4
+; Init Dur Amp                           Pitch                Delta Rise Decay
+i5 0   15  [$RissetAmp*1.1] [7.00+$TRN.] 0.03    1      4
 
 ; Granular Effect
-;  Init  Dur  Amplitude Pitch Dens Pan
-i2  2    6     2500     220   200   0.1 0.1
-i2  3    6     1000     440   .     0.3 0.3
-i2  4    6     2500     440   .     0.9 0.9
-i2  6    6     3000     660   .     0.5 0.5
-i2  10   6     1000     660   300   0.5 0.5
+;  Init  Dur  Amplitude                      Freq Dens Pan
+i2  2    6     [$GranularAmp.*2]     220   200   0.5 0.1
+i2  3    6     [$GranularAmp.*1.5]     440   .     0.7 0.3
+i2  4    6     [$GranularAmp.*2]     440   .     0.5 0.9
+i2  6    6     [$GranularAmp.*2]     660   .     0.5 0.7
+i2  10   6    [$GranularAmp./2]     660   300   0.5 0.3
+i2  14   2  [$GranularAmp./5]     [$C3]   300 0.5 0.5
+
 
 ; Flute
 ; Init  Dur  Amplitude Pitch  Pressure  Breath
@@ -511,7 +522,7 @@ i1 11     1    .       [8.07+$TRN.]    >        .
 i1  +     1    .       [8.04+$TRN.]    0.95       .  
 i1  +     1    .       [8.07+$TRN.]    >        .     
 i1  +     1    .       [9.04+$TRN.]    >        .    
-i1  +     1    .       [9.00+$TRN.]    0.80        .  
+i1  +     2    .       [9.00+$TRN.]    0.80        .  
 e
 
 </CsScore>
