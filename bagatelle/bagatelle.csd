@@ -69,6 +69,7 @@ instr 1
 	anode3 = apol + afeedback * ifeed2
 
 	; Low-pass filter
+	; 2000Hz is the frequency that will be attenuated by a half
 	aexit tone anode3, 2000
 
 	; Flute bore delay
@@ -94,21 +95,26 @@ endin
 ; * Stereo positioning
 ; * Gaussian envelope
 instr 2
+	; The original frequency of the file is used
+	; ftlen returns the size of the table and 44100 is the sample rate
+	iwave  = 12
+	iorigfreq = 44100 / ftlen(iwave)
+
 	idur      = p3
 	kamp      = p4
-	kpitch    = p5
+	kpitch    = iorigfreq
 	kdens     = p6
 	iinitpan  = p7
-            ifinalpan = p8
-	kampoff   = 500
+    ifinalpan = p8
+	kampoff   = p4/10
 	kpitchoff = 200
-	kgdur     = 0.6
+	kgdur     = 0.5
 	igfn      = 12
 	iwfn      = 11
 	imgdur    = 1 
  
-	;kcps = 1/idur	 
-	;kenv1 oscil kamp/2, 1, 15  
+	
+  
  	; Linear envelope
  	; Fixed rise:decay ratio, an user controlled envelope is
  	; used in other instruments.
@@ -293,8 +299,11 @@ endin
 ; The characteristic envelope of a hihat is achieved using
 ; an exponetial decreasing envelope instead of the usual linear one.
 ; 
+; Based on the algorithm described on pages 103 and 104 of 
+; "Computer Music Synthesis" by C. Dodge and T. Jerse.
+;
 ; Used techniques:
-; * Random numbers
+; * Random ring modulation
 ; * Exponential envelope
 instr 9
 	idur = p3
@@ -306,12 +315,15 @@ instr 9
 	; Exponential envelope
 	kenv expon 1, idur, 0.0001
 	
-	; Random noise
+	; Random noise modulator
 	; The randi opcode generates random numbers at the
 	; specified frequency. If this frequency is less than the
 	; sampling frequency, it uses linear interpolation. This
 	; can be used in order to achieve a more "metallic" sound.
 	arandom randi iamp, irandf
+	; The random noise signal modulates a sine wave.
+	; This is an example of random ring modulation.
+	; It is a RM due to the fact that irand generates a bipolar signal.
 	ahihat oscil arandom, ifreq, isinewave
 	
 	aout = ahihat*kenv	
@@ -381,7 +393,7 @@ i2  3    6     [$GranularAmp.*1.5]  440   .     0.7 0.3
 i2  4    6     [$GranularAmp.*2]     440   .     0.5 0.9
 i2  6    6     [$GranularAmp.*2]     660   .     0.5 0.7
 i2  10   6    [$GranularAmp./2]     660   300   0.5 0.3
-i2  14   26  [$GranularAmp./5]     [$C3]   300 0.5 0.5
+i2  14   28  [$GranularAmp./5]     [$C3]   300 0.5 0.5
 
 ; Flute
 ; Init  Dur  Amplitude      Pitch  Pressure  Breath
@@ -499,7 +511,7 @@ s
 
 
 ; Risset Arpeggio
-; Init Dur Amp                           Pitch                Delta Rise Decay
+; Init Dur Amp              Pitch        Delta Rise Decay
 i5 0   15  [$RissetAmp*1.1] [7.00+$TRN.] 0.03    1      4
 
 ; Granular Effect
